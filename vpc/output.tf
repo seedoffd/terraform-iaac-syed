@@ -25,3 +25,7 @@ output "private subnet2" {
 output "private subnet2" {
   value = "${aws_vpc.dev_private3.id}"
 }
+
+output "IGW" {
+  value = "${aws_internet_gateway.dev.id}"
+}
