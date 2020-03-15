@@ -1,7 +1,8 @@
 provider "aws" {
   region = "us-west-2"
 }
-# Get's Ubuntu ami 
+
+# Gets Ubuntu AMI
 data "aws_ami" "ubuntu" {
   most_recent = true
 
@@ -18,11 +19,11 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-output "Ubuntu_AMI_ID" {
-  value       = "${data.aws_ami.ubuntu.id}"
+output "UBUNTU_AMI_ID" {
+  value = "${data.aws_ami.ubuntu.id}"
 }
 
-# Get's Centos ami 
+# Gets Centos AMI
 data "aws_ami" "centos" {
   most_recent = true
 
@@ -39,49 +40,38 @@ data "aws_ami" "centos" {
   owners = ["679593333241"] # Canonical
 }
 
-output "Centos_AMI_ID" {
-  value       = "${data.aws_ami.centos.id}"
-}
-
 resource "aws_key_pair" "provisioner" {
   key_name   = "provisioner-key"
   public_key = "${file("~/.ssh/id_rsa.pub")}"
 }
+
 resource "aws_instance" "web" {
   ami           = "${data.aws_ami.ubuntu.id}"
   instance_type = "t2.micro"
-  key_name = "${aws_key_pair.provisioner.key_name}"
+  key_name      = "${aws_key_pair.provisioner.key_name}"
 
-
-  # Copies the file as the root user using SSH
-# provisioner "file" {
-#   connection {
-#     type     = "ssh"
-#     user     = "ubuntu"
-#     private_key = "${file("~/.ssh/id_rsa")}"
-#     host     = "${self.public_ip}"
-#      }
-#   source      = "test"
-#   destination = "/tmp/test"
-#   }
-
-  provisioner "remote-exec"{
+  provisioner "remote-exec" {
     connection {
-    type     = "ssh"
-    user     = "ubuntu"
-    private_key = "${file("~/.ssh/id_rsa")}"
-    host     = "${self.public_ip}"
-     }
-      inline = [
-          "sudo apt-get install telnet -y",
-          "sudo mkdir /tmp/ubuntu",
-          "w",
-          "free -m",
-          "sleep 5"
-          ]
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = "${file("~/.ssh/id_rsa")}"
+      host        = "${self.public_ip}"
+    }
+
+    inline = [
+      "sudo apt-get install telnet -y",
+      "sudo mkdir /tmp/ubuntu",
+      "w",
+      "free -m",
+      "sleep 5",
+    ]
   }
 
   tags = {
     Name = "HelloWorld"
   }
+}
+
+output "CENTOS_AMI_ID" {
+  value = "${data.aws_ami.centos.id}"
 }
